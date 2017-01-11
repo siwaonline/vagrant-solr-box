@@ -26,7 +26,7 @@ class must-have {
     before => Apt::Ppa["ppa:webupd8team/java"],
   }
 
-  package { "oracle-java7-installer":
+  package { "oracle-java8-installer":
     ensure => present,
     require => Exec["apt-get update 2"],
   }
@@ -37,7 +37,7 @@ class must-have {
     user => "vagrant",
     path => "/usr/bin/:/bin/",
     require => Package["curl"],
-    before => Package["oracle-java7-installer"],
+    before => Package["oracle-java8-installer"],
     logoutput => true,
   }
 
@@ -66,6 +66,25 @@ class must-have {
     require => File["/etc/init/solr.conf"],
   }
 
+  file { '/vagrant/solr/server/solr/configsets':
+    ensure => directory,
+    recurse => remote,
+    source => "/tmp/solrconfig/configsets",
+    require => File["/etc/init.d/solr"]
+  }
+
+  file { '/vagrant/solr/server/solr/cores':
+    ensure => directory,
+    recurse => remote,
+    source => "/tmp/solrconfig/cores",
+    require => File["/vagrant/solr/server/solr/configsets"]
+  }
+
+  file { '/vagrant/solr/server/solr/solr.xml':
+    source => "/tmp/solrconfig/solr.xml",
+    require => File["/vagrant/solr/server/solr/cores"]
+  }
+
   service { "solr":
     enable => true,
     ensure => running,
@@ -73,7 +92,7 @@ class must-have {
     provider => "upstart",
     #hasrestart => true,
     #hasstatus => true,
-    require => [ File["/etc/init/solr.conf"], File["/etc/init.d/solr"], Package["oracle-java7-installer"] ],
+    require => [ File["/etc/init/solr.conf"], File["/etc/init.d/solr"], Package["oracle-java8-installer"] , File["/vagrant/solr/server/solr/configsets"] , File["/vagrant/solr/server/solr/cores"] , File["/vagrant/solr/server/solr/solr.xml"] ],
   }
 }
 

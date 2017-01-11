@@ -176,3 +176,5 @@ pip-log.txt
 .vagrant
 
 solr
+
+.idea
